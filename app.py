@@ -53,8 +53,10 @@ def load_faq():
     df = pd.read_excel("UP_Wiki.xlsx")
     documents = []
     for _, row in df.iterrows():
-        content = f"{row['Title']}\n\n{row['Content']}"
-        documents.append(Document(page_content=content))
+        title = str(row.get('Title', '')).strip()
+        content = str(row.get('Content', '')).strip()
+        full_text = f"{title}\n\n{content}"  
+        documents.append(Document(page_content=full_text, metadata={"source": "UP_Wiki.xlsx"}))
 
     text_splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
     split_docs = text_splitter.split_documents(documents)
