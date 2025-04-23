@@ -5,7 +5,9 @@ from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
+from langchain.schema import Document
 from docx import Document
+import pandas as pd
 from langchain_community.document_loaders import Docx2txtLoader
 from PIL import Image
 import io
@@ -48,12 +50,18 @@ os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
 @st.cache_resource
 def load_faq():
-    loader = Docx2txtLoader("handbook.docx")  # Correct loader for .docx
-    documents = loader.load()
+    df = pd.read_excel("UP_Wiki.xlsx")
+    documents = []
+    for _, row in df.iterrows():
+        content = f"{row['title']}\n\n{row['content']}"
+        documents.append(Document(page_content=content))
+
     text_splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
     split_docs = text_splitter.split_documents(documents)
+
     embeddings = OpenAIEmbeddings()
     db = FAISS.from_documents(split_docs, embeddings)
+
     return db
 
 # @st.cache_resource
