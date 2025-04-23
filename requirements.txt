@@ -8,3 +8,4 @@ docx2txt
 Pillow
 tiktoken
 panda
+openpyxl
