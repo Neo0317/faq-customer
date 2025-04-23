@@ -8,6 +8,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.schema import Document
 from docx import Document
 import pandas as pd
+from langchain.docstore.document import Document
 from langchain_community.document_loaders import Docx2txtLoader
 from PIL import Image
 import io
@@ -55,8 +56,8 @@ def load_faq():
     for _, row in df.iterrows():
         title = str(row.get('Title', '')).strip()
         content = str(row.get('Content', '')).strip()
-        full_text = f"{title}\n\n{content}"  
-        documents.append(Document(page_content=full_text, metadata={"source": "UP_Wiki.xlsx"}))
+        full_text = f"{title}\n\n{content}"
+        documents.append(Document(page_content=full_text, metadata={"source": "UP_Wiki"}))
 
     text_splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
     split_docs = text_splitter.split_documents(documents)
