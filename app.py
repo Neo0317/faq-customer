@@ -3,10 +3,7 @@ import pandas as pd
 import os
 from langchain.vectorstores import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
-from langchain.chains import RetrievalQA
-from langchain.llms import OpenAI
 
 st.set_page_config(page_title="Customer Support Bot", page_icon="🤖")
 
@@ -46,19 +43,13 @@ os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 @st.cache_resource
 def load_faq():
     df = pd.read_excel("UP_Wiki.xlsx")
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=50,
-        separators=["\n\n", "\n", ".", " ", ""]
-    )
+    
     documents = []
     for _, row in df.iterrows():
         title = str(row.get('Title', '')).strip()
         content = str(row.get('Content', '')).strip()
         if content:
-            chunks = splitter.split_text(content)
-            for chunk in chunks:
-                documents.append(Document(page_content=chunk, metadata={"title": title}))
+            documents.append(Document(page_content=content, metadata={"title": title}))
 
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     db = FAISS.from_documents(documents, embeddings)
@@ -67,12 +58,15 @@ def load_faq():
 retriever = load_faq().as_retriever(search_kwargs={"k": 5})
 
 query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
+
 if query:
     with st.spinner(text["spinner"]):
         docs = retriever.get_relevant_documents(query)
         if docs:
             st.success(text["response_title"])
             for i, doc in enumerate(docs, start=1):
-                st.markdown(f"**{i}.** {doc.page_content}")
+                title = doc.metadata.get("title", "")
+                st.markdown(f"### {i}. {title}")
+                st.markdown(doc.page_content)
         else:
-            st.warning("No relevant content found.")
+            st.warning("没有找到相关内容。" if lang == "zh" else "No relevant content found.")
