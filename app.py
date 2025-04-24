@@ -52,21 +52,21 @@ def load_faq():
         content = str(row.get('Content', '')).strip()
         if content:
             documents.append(Document(page_content=content))
-    splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=20)
+    splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
     split_docs = splitter.split_documents(documents)
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     db = FAISS.from_documents(split_docs, embeddings)
     return db
 
-retriever = load_faq().as_retriever(search_kwargs={"k": 5})
-
+db = load_faq()
+qa_chain = RetrievalQA.from_chain_type(
+    llm=OpenAI(temperature=0),
+    retriever=db.as_retriever(search_kwargs={"k": 3}),
+)
 query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
+
 if query:
     with st.spinner(text["spinner"]):
-        docs = retriever.get_relevant_documents(query)
-        if docs:
-            st.success(text["response_title"])
-            for i, doc in enumerate(docs, start=1):
-                st.markdown(f"**{i}.** {doc.page_content}")
-        else:
-            st.warning("No relevant content found.")
+        result = qa_chain({"query": query})
+        st.success(text["response_title"])
+        st.write(result["result"])
