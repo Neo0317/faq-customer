@@ -5,24 +5,48 @@ from langchain.vectorstores import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.docstore.document import Document
 
-st.set_page_config(page_title="Customer Support Bot", page_icon="🤖")
+st.set_page_config(page_title="UP Wiki Assistant", page_icon="📚")
+
+st.markdown("""
+    <style>
+        .main {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .stTextInput > label {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .card {
+            padding: 1rem;
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 LANG = {
     "zh": {
-        "page_title": "客服机器人",
-        "header": "🤖 智能客服问答机器人",
-        "input_label": "请输入你的问题：",
-        "input_placeholder": "例如：如何退货？",
-        "spinner": "正在检索答案...",
-        "response_title": "客服回答：",
+        "page_title": "UP智能助手",
+        "header": "📚 UP智能助手",
+        "input_label": "🔍 请输入你的问题：",
+        "input_placeholder": "例如：如何获取工时？",
+        "spinner": "📖 正在查找相关内容...",
+        "response_title": "📘 检索结果如下：",
     },
     "en": {
-        "page_title": "Customer Support Bot",
-        "header": "🤖 Smart Customer Support Q&A",
-        "input_label": "Please enter your question:",
-        "input_placeholder": "e.g., How to return a product?",
-        "spinner": "Retrieving answer...",
-        "response_title": "Bot Answer:",
+        "page_title": "UP Wiki Assistant",
+        "header": "📚 UP Wiki Assistant",
+        "input_label": "🔍 Please enter your query:",
+        "input_placeholder": "e.g., How to log hours?",
+        "spinner": "📖 Searching...",
+        "response_title": "📘 Results:",
     }
 }
 
