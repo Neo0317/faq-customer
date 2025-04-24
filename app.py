@@ -55,7 +55,7 @@ def load_faq():
     db = FAISS.from_documents(documents, embeddings)
     return db
 
-retriever = load_faq().as_retriever(search_kwargs={"k": 5})
+retriever = load_faq().as_retriever(search_kwargs={"k": 10})
 
 query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
 
