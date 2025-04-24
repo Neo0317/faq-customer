@@ -51,7 +51,7 @@ def load_faq():
         title = str(row.get('Title', '')).strip()
         content = str(row.get('Content', '')).strip()
         if content:
-            documents.append(Document(page_content=content, metadata={"title": title}))
+            documents.append(Document(page_content=content))
     splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
     split_docs = splitter.split_documents(documents)
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -62,7 +62,6 @@ db = load_faq()
 qa_chain = RetrievalQA.from_chain_type(
     llm=OpenAI(temperature=0),
     retriever=db.as_retriever(search_kwargs={"k": 3}),
-    return_source_documents=True
 )
 query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
 
@@ -71,7 +70,3 @@ if query:
         result = qa_chain({"query": query})
         st.success(text["response_title"])
         st.write(result["result"])
-
-        st.markdown(text["source"])
-        for doc in result["source_documents"]:
-            st.write(f"- {doc.metadata.get('title', 'Unknown')}")
