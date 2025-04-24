@@ -52,7 +52,7 @@ def load_faq():
         content = str(row.get('Content', '')).strip()
         if content:
             documents.append(Document(page_content=content))
-    splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
+    splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=20)
     split_docs = splitter.split_documents(documents)
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     db = FAISS.from_documents(split_docs, embeddings)
