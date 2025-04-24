@@ -3,9 +3,6 @@ openai
 langchain
 langchain-community
 faiss-cpu
-python-docx
-docx2txt
-Pillow
-tiktoken
-panda
+pandas
 openpyxl
+tiktoken

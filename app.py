@@ -1,18 +1,12 @@
 import streamlit as st
+import pandas as pd
+import os
 from langchain.vectorstores import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.docstore.document import Document
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
-from langchain.document_loaders import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.schema import Document
-from docx import Document
-import pandas as pd
-from langchain.docstore.document import Document
-from langchain_community.document_loaders import Docx2txtLoader
-from PIL import Image
-import io
-import os
 
 st.set_page_config(page_title="Customer Support Bot", page_icon="🤖")
 
@@ -56,39 +50,28 @@ def load_faq():
     for _, row in df.iterrows():
         title = str(row.get('Title', '')).strip()
         content = str(row.get('Content', '')).strip()
-        full_text = f"{title}\n\n{content}"
-        documents.append(Document(page_content=full_text, metadata={"source": "UP_Wiki"}))
-
-    text_splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
-    split_docs = text_splitter.split_documents(documents)
-
-    embeddings = OpenAIEmbeddings()
+        if content:
+            documents.append(Document(page_content=content, metadata={"title": title}))
+    splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
+    split_docs = splitter.split_documents(documents)
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     db = FAISS.from_documents(split_docs, embeddings)
-
     return db
 
-# @st.cache_resource
-# def extract_images_from_docx(docx_path):
-#     try:
-#         doc = Document(docx_path)
-#         images = []
-#         for rel in doc.part._rels:
-#             rel = doc.part._rels[rel]
-#             if "image" in rel.target_ref:
-#                 img_data = rel.target_part.blob
-#                 image = Image.open(io.BytesIO(img_data))
-#                 images.append(image)
-#         return images
-#     except Exception as e:
-#         return []
-
 db = load_faq()
-qa_chain = RetrievalQA.from_chain_type(llm=OpenAI(temperature=0), retriever=db.as_retriever())
-
+qa_chain = RetrievalQA.from_chain_type(
+    llm=OpenAI(temperature=0),
+    retriever=db.as_retriever(search_kwargs={"k": 3}),
+    return_source_documents=True
+)
 query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
 
 if query:
     with st.spinner(text["spinner"]):
-        answer = qa_chain.run(query)
+        result = qa_chain({"query": query})
         st.success(text["response_title"])
-        st.write(answer)
+        st.write(result["result"])
+
+        st.markdown(text["source"])
+        for doc in result["source_documents"]:
+            st.write(f"- {doc.metadata.get('title', 'Unknown')}")
