@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from langchain.vectorstores import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
@@ -46,16 +46,22 @@ os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 @st.cache_resource
 def load_faq():
     df = pd.read_excel("UP_Wiki.xlsx")
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50,
+        separators=["\n\n", "\n", ".", " ", ""]
+    )
     documents = []
     for _, row in df.iterrows():
         title = str(row.get('Title', '')).strip()
         content = str(row.get('Content', '')).strip()
         if content:
-            documents.append(Document(page_content=content))
-    splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=20)
-    split_docs = splitter.split_documents(documents)
+            chunks = splitter.split_text(content)
+            for chunk in chunks:
+                documents.append(Document(page_content=chunk, metadata={"title": title}))
+
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-    db = FAISS.from_documents(split_docs, embeddings)
+    db = FAISS.from_documents(documents, embeddings)
     return db
 
 retriever = load_faq().as_retriever(search_kwargs={"k": 5})
