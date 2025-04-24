@@ -58,15 +58,15 @@ def load_faq():
     db = FAISS.from_documents(split_docs, embeddings)
     return db
 
-db = load_faq()
-qa_chain = RetrievalQA.from_chain_type(
-    llm=OpenAI(temperature=0),
-    retriever=db.as_retriever(search_kwargs={"k": 3}),
-)
-query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
+retriever = load_faq().as_retriever(search_kwargs={"k": 5})
 
+query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
 if query:
     with st.spinner(text["spinner"]):
-        result = qa_chain({"query": query})
-        st.success(text["response_title"])
-        st.write(result["result"])
+        docs = retriever.get_relevant_documents(query)
+        if docs:
+            st.success(text["response_title"])
+            for i, doc in enumerate(docs, start=1):
+                st.markdown(f"**{i}.** {doc.page_content}")
+        else:
+            st.warning("No relevant content found.")
