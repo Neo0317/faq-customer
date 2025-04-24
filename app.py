@@ -36,7 +36,7 @@ LANG = {
         "page_title": "UP智能助手",
         "header": "📚 UP智能助手",
         "input_label": "🔍 请输入你的问题：",
-        "input_placeholder": "例如：如何在Dejavoo刷卡机上删除credit Ap？",
+        "input_placeholder": "例如：如何在Dejavoo刷卡机上删除credit App？",
         "spinner": "📖 正在查找相关内容...",
         "response_title": "📘 检索结果如下：",
     },
