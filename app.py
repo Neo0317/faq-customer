@@ -36,7 +36,7 @@ LANG = {
         "page_title": "UP智能助手",
         "header": "📚 UP智能助手",
         "input_label": "🔍 请输入你的问题：",
-        "input_placeholder": "例如：如何获取工时？",
+        "input_placeholder": "例如：如何在Dejavoo刷卡机上删除credit Ap？",
         "spinner": "📖 正在查找相关内容...",
         "response_title": "📘 检索结果如下：",
     },
@@ -44,7 +44,7 @@ LANG = {
         "page_title": "UP Wiki Assistant",
         "header": "📚 UP Wiki Assistant",
         "input_label": "🔍 Please enter your query:",
-        "input_placeholder": "e.g., How to log hours?",
+        "input_placeholder": "e.g., How to delete the credit App on Dejavoo terminals",
         "spinner": "📖 Searching...",
         "response_title": "📘 Results:",
     }
