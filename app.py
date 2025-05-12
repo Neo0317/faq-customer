@@ -4,6 +4,8 @@ import os
 from langchain.vectorstores import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.docstore.document import Document
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import RetrievalQA
 
 st.set_page_config(page_title="UP Wiki Assistant", page_icon="📚")
 
@@ -56,6 +58,7 @@ if "lang" not in st.session_state:
 with st.sidebar:
     lang_choice = st.selectbox("🌐 Language / 语言", ("中文", "English"))
     st.session_state.lang = "zh" if lang_choice == "中文" else "en"
+    simplify = st.checkbox("简洁模式 / Concise mode", value=True)
 
 lang = st.session_state.lang
 text = LANG[lang]
@@ -79,18 +82,31 @@ def load_faq():
     db = FAISS.from_documents(documents, embeddings)
     return db
 
+@st.cache_resource
+def get_qa_chain():
+    db = load_faq()
+    retriever = db.as_retriever(search_kwargs={"k": 3})  # 取最相关的3条
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+    return RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
+
 retriever = load_faq().as_retriever(search_kwargs={"k": 5})
+qa_chain = get_qa_chain()
 
 query = st.text_input(text["input_label"], placeholder=text["input_placeholder"])
 
 if query:
     with st.spinner(text["spinner"]):
-        docs = retriever.get_relevant_documents(query)
-        if docs:
+        if simplify:
+            answer = qa_chain.run(query)
             st.success(text["response_title"])
-            for i, doc in enumerate(docs, start=1):
-                title = doc.metadata.get("title", "")
-                st.markdown(f"### {i}. {title}")
-                st.markdown(doc.page_content)
+            st.markdown(answer)
         else:
-            st.warning("没有找到相关内容。" if lang == "zh" else "No relevant content found.")
+            docs = retriever.get_relevant_documents(query)
+            if docs:
+                st.success(text["response_title"])
+                for i, doc in enumerate(docs, start=1):
+                    title = doc.metadata.get("title", "")
+                    st.markdown(f"### {i}. {title}")
+                    st.markdown(doc.page_content)
+            else:
+                st.warning("没有找到相关内容。" if lang == "zh" else "No relevant content found.")
