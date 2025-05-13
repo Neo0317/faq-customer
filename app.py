@@ -13,6 +13,10 @@ st.markdown("""
     <style>
         .main {
             background-color: #f8f9fa;
+            background-image: url("https://raw.githubusercontent.com/Neo0317/faq-customer/main/background.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             font-family: 'Segoe UI', sans-serif;
         }
         h1 {
