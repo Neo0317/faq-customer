@@ -1,6 +1,6 @@
 streamlit
 openai
-langchain
+langchain==0.0.340
 langchain-community
 faiss-cpu
 pandas

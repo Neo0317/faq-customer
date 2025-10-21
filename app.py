@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-from langchain_community.vectorstores import FAISS
+from langchain.vectorstores import FAISS
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.docstore.document import Document
 from langchain.chat_models import ChatOpenAI
